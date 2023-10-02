@@ -2,6 +2,10 @@ const mongoose = require("mongoose");
 
 const transectionSchema = new mongoose.Schema(
   {
+    userid: {
+      type: String,
+      required: true,
+    },
     amount: {
       type: number,
       required: [true, "amount is required"],

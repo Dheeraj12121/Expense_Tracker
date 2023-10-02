@@ -12,4 +12,4 @@ const router = express.Router();
 router.post('/add-transection', addTransection)
 
 // get transections
-router.get('/get-transection', getAllTransection)
+router.post('/get-transection', getAllTransection)
