@@ -2,9 +2,13 @@ const mongoose = require("mongoose");
 
 const transectionSchema = new mongoose.Schema(
   {
-    amout: {
+    amount: {
       type: number,
       required: [true, "amount is required"],
+    },
+    type: {
+      type: String,
+      required: [true, "type is required"],
     },
     category: {
       type: String,
