@@ -1,13 +1,25 @@
 import React, { useState } from "react";
-import { Form, Modal, Select } from "antd";
+import { Form, Modal, Select, message } from "antd";
 import Layout from "../components/Layout/Layout";
+import axios from "axios";
 
 const HomePage = () => {
   const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(false)
 
   // form handling
-  const handleSubmit = (value) => {
-    console.log(value);
+  const handleSubmit = async (value) => {
+    try {
+      const user = JSON.parse(localStorage.getItem('user'))
+      setLoading(true)
+      await axios.post('/transections/add-transection'. {...values,userid:user.id})
+      setLoading(false)
+      message("Transection ADded Successfully")
+      setShowModal(false)
+    } catch (error) {
+      setLoading(false)
+      message.error("Faild to add transection")
+    }
   };
 
   return (
