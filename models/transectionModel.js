@@ -34,3 +34,5 @@ const transectionSchema = new mongoose.Schema(
 );
 
 const transectionModel = mongoose.model("transections", transectionSchema);
+
+module.export = transectionModel;
