@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Form, Modal, Select, Table, message, DatePicker } from "antd";
+import { UnorderedListOutlined, AreaChartOutlined } from "@ant-design/icons";
 import Layout from "../components/Layout/Layout";
-import axios from "axios";
+import axios, { all } from "axios";
 import Spin from "../components/Spin";
-import moment from 'moment';
+import moment from "moment";
 import { RangePicker } from " DatePicker";
+import Analytics from "../components/Analytics";
 
 const HomePage = () => {
   const [showModal, setShowModal] = useState(false);
@@ -12,14 +14,15 @@ const HomePage = () => {
   const [allTransection, setAllTransection] = useState([]);
   const [frequency, setFrequency] = useState("7");
   const [selectedDate, setSelectedDate] = useState([]);
-  const [type, setType] = useState('all')
+  const [type, setType] = useState("all");
+  const [viewData, setViewData] = useState("table");
 
   // table data
   const columns = [
     {
       title: "Date",
       dataIndex: "date",
-      render: (text) => <span>{moment(text).format('YYYY-MM-DD')}</span>
+      render: (text) => <span>{moment(text).format("YYYY-MM-DD")}</span>,
     },
     {
       title: "Amount",
@@ -54,7 +57,7 @@ const HomePage = () => {
           userid: user._id,
           frequency,
           selectedDate,
-          type
+          type,
         });
         setLoading(false);
         setAllTransection(res.data);
@@ -119,6 +122,22 @@ const HomePage = () => {
             />
           )}
         </div>
+
+        <div className="switch-icons">
+          <UnorderedListOutlined
+            className={`mx-2 ${
+              viewData === "table" ? "active-icon" : "inactive-icon"
+            }`}
+            onClick={() => setViewData("table")}
+          />
+          <AreaChartOutlined
+            className={`mx-2 ${
+              viewData === "table" ? "active-icon" : "inactive-icon"
+            }`}
+            onClick={() => setViewData("analytics")}
+          />
+        </div>
+
         <div>
           <button
             className="btn btn-primary"
@@ -128,7 +147,9 @@ const HomePage = () => {
           </button>
         </div>
         <div className="content">
-          <Table columns={colums} dataSource={allTransection} />
+        {viewData === 'table' ? <Table columns={colums} dataSource={allTransection} /> 
+        : <Analytics allTransection={allTransection}/>  }
+          
         </div>
         <Modal
           title="Add Transection"
