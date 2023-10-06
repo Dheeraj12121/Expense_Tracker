@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Form, Modal, Select, Table, message, DatePicker } from "antd";
-import { UnorderedListOutlined, AreaChartOutlined } from "@ant-design/icons";
+import {
+  UnorderedListOutlined,
+  AreaChartOutlined,
+  EditOutlined,
+  DeleteOutlined,
+} from "@ant-design/icons";
 import Layout from "../components/Layout/Layout";
 import axios, { all } from "axios";
 import Spin from "../components/Spin";
@@ -16,6 +21,7 @@ const HomePage = () => {
   const [selectedDate, setSelectedDate] = useState([]);
   const [type, setType] = useState("all");
   const [viewData, setViewData] = useState("table");
+  const [editable, setEditable] = useState(null);
 
   // table data
   const columns = [
@@ -42,6 +48,22 @@ const HomePage = () => {
     },
     {
       title: "Actions",
+      render: (text, record) => (
+        <div>
+          <EditOutlined
+            onClick={() => {
+              setEditable(record);
+              setShowModal(true);
+            }}
+          />
+          <DeleteOutlined
+            className="mx-2"
+            onClick={() => {
+              handleDelete(record);
+            }}
+          />
+        </div>
+      ),
     },
   ];
 
@@ -70,18 +92,45 @@ const HomePage = () => {
     getAllTransactions();
   }, [frequency, selectedDate, type]);
 
+  // delete handler
+  const handleDelete = async (record) => {
+    try {
+      setLoading(true)
+      await axios.post("/transections/delete-transection", {transactionId:record._id})
+      setLoading(false)
+      message.success("Transaction Deleted!")
+    } catch (error) {
+      setLoading(false)
+      console.log(error);
+      message.error("Unable to delete")
+    }
+  };
+
   // form handling
   const handleSubmit = async (value) => {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
       setLoading(true);
-      await axios.post("/transections/add-transection", {
-        ...values,
-        userid: user.id,
-      });
-      setLoading(false);
-      message("Transection Added Successfully");
+      if (editable) {
+        await axios.post("/transections/edit-transection", {
+          payload: {
+            ...values,
+            userId: user._id,
+          },
+          transactionId: editable._id,
+        });
+        setLoading(false);
+        message("Transection Updated Successfully");
+      } else {
+        await axios.post("/transections/add-transection", {
+          ...values,
+          userid: user.id,
+        });
+        setLoading(false);
+        message("Transection Added Successfully");
+      }
       setShowModal(false);
+      setEditable(null);
     } catch (error) {
       setLoading(false);
       message.error("Faild to add transection");
@@ -147,17 +196,23 @@ const HomePage = () => {
           </button>
         </div>
         <div className="content">
-        {viewData === 'table' ? <Table columns={colums} dataSource={allTransection} /> 
-        : <Analytics allTransection={allTransection}/>  }
-          
+          {viewData === "table" ? (
+            <Table columns={colums} dataSource={allTransection} />
+          ) : (
+            <Analytics allTransection={allTransection} />
+          )}
         </div>
         <Modal
-          title="Add Transection"
+          title={editable ? "Edit Transaction" : "Add Transection"}
           open={showModal}
           onCancel={() => setShowModal(false)}
           footer={false}
         >
-          <Form layout="vertical" onFinish={handleSubmit}>
+          <Form
+            layout="vertical"
+            onFinish={handleSubmit}
+            initialValues={editable}
+          >
             <Form.Item label="Amount" name="amount">
               <Input type="text" />
             </Form.Item>
